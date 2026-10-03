@@ -77,6 +77,31 @@ All runtime checks used loopback synthetic services with external server fetches
 
 The existing Nitro/Vite configuration and Vercel settings remain in place. A new patched build must be redeployed; updating dependencies alone does not repair an existing deployment. Vercel deployment success remains unconfirmed until the platform completes its build and runtime checks. Live integrations and the separate avatar-privacy prerequisite below remain pending.
 
+## npm lockfile synchronization - October 3, 2026
+
+Vercel rejected commit `da4095912946112b4cc82fa4d95eb2e6ce2fc181` during `npm ci` because the lockfile omitted `@emnapi/core@1.11.3` and `@emnapi/runtime@1.11.3`. A fresh manifest-only copy reproduced both missing-entry errors with npm `11.21.0`. The installed npm `11.6.1` accepted the incomplete lockfile, so its earlier passing installation did not detect this inconsistency. The Vercel log supplied for this repair does not identify its npm version.
+
+The lockfile was synchronized by npm in a fresh directory without `node_modules`, retaining the existing lockfile to preserve dependency versions:
+
+```powershell
+npx --yes --package=npm@11.21.0 npm install --package-lock-only --ignore-scripts --include=optional
+```
+
+No entries were written manually. npm added the missing root `@emnapi/core` and `@emnapi/runtime` entries at `1.11.3`, plus the bundled `1.11.1` entries beneath `@tailwindcss/oxide-wasm32-wasi`. Every pre-existing resolved package version remains unchanged. The security patch still resolves `@tanstack/react-start@1.168.60`, `@tanstack/start-server-core@1.169.39`, and `@tanstack/react-router@1.170.41`.
+
+### Lockfile repair validation
+
+- Fresh `npm ci` with npm `11.21.0`: passed with normal install flags and lifecycle handling; 490 packages installed and zero vulnerabilities reported.
+- Fresh `npm ci` with the repository's installed npm `11.6.1`: passed; 535 packages installed and zero vulnerabilities reported.
+- TypeScript and lint: passed.
+- All 37 existing tests: passed, with no failures or skips.
+- Normal Node production build and Vercel production build: passed using the existing Nitro/Vite configuration. The Vercel output retains Build Output API v3 routing and its Node 24 server function.
+- `npm audit`: zero vulnerabilities across all severity categories.
+- Linux x64/glibc dependency resolution: passed with npm `11.21.0` using `npm ci --os=linux --cpu=x64 --libc=glibc --dry-run --ignore-scripts`. This is a resolution check; native Linux installation could not run because the local WSL VM timed out.
+- Manifest, application source, branding assets, migrations, environment files, and deployment configuration: unchanged. The lockfile and this release document are the only changes in this repair.
+
+Builds used inert process-scoped public settings in the isolated validation directory; no environment files or deployed settings were changed and no live integration tests were run. The Vercel install command remains `npm ci`. The synchronized lockfile is ready for a new Vercel build, but deployment success remains unconfirmed until Vercel completes that deployment.
+
 ## Live release prerequisites
 
 Live Supabase/Gemini, deployed two-user RLS, email/recovery/Google OAuth, private avatar policies, cloud account deletion, and real rate limiting remain pending by the owner's choice to use local/mocked workflows. The historical avatar SELECT policy permits bucket-wide reads; private bucket configuration alone is insufficient. No deployment, remote migration, production-data change, or live integration claim is made.
