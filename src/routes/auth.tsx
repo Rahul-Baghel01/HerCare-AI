@@ -11,12 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { GlassCard, Disclaimer } from "@/components/hercare/kit";
 import { supabase } from "@/integrations/supabase/client";
+import { authRedirectUrl } from "@/lib/auth-redirect";
 
 const searchSchema = z.object({ mode: z.enum(["signin", "signup"]).optional() });
-
-function authRedirectUrl(path: string) {
-  return new URL(path, window.location.origin).toString();
-}
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -83,7 +80,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: authRedirectUrl("/dashboard"),
+        emailRedirectTo: authRedirectUrl("/dashboard", window.location.origin),
         data: { full_name: name },
       },
     });
@@ -105,7 +102,7 @@ function AuthPage() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: authRedirectUrl("/dashboard") },
+      options: { redirectTo: authRedirectUrl("/dashboard", window.location.origin) },
     });
     setBusy(false);
     if (error) {
@@ -122,7 +119,7 @@ function AuthPage() {
     setBusy(true);
     setAuthError(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: authRedirectUrl("/reset-password"),
+      redirectTo: authRedirectUrl("/reset-password", window.location.origin),
     });
     setBusy(false);
     if (error) {

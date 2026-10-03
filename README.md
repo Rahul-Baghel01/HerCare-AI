@@ -169,6 +169,8 @@ In **Supabase Authentication > URL Configuration**:
 - For local integration work, allow `http://localhost:8080/dashboard` and `http://localhost:8080/reset-password`; add port 3000 equivalents if testing a normal production preview.
 - Add exact preview-host URLs when needed, or a narrowly scoped project/team pattern. Avoid a wildcard covering every Vercel deployment.
 
+If sign-in, signup confirmation or password reset lands on Vercel's `404: DEPLOYMENT_NOT_FOUND`, Supabase rejected the app's redirect and fell back to a stale **Site URL** (for example, a removed project's `*.vercel.app` host). Update the Site URL and Redirect URLs above to the current production host; no redeploy is needed.
+
 Enable Google under **Supabase Authentication > Providers**. Configure the Google client ID/secret there, and register the Supabase callback shown in that panel in Google Cloud, normally `https://<project-ref>.supabase.co/auth/v1/callback`. The app has no `/auth/callback` route. See the official [redirect URL guide](https://supabase.com/docs/guides/auth/redirect-urls) and [Google provider guide](https://supabase.com/docs/guides/auth/social-login/auth-google).
 
 Browser sessions persist in local storage and refresh through the Supabase client. Authenticated application routes disable SSR and verify the current user; server functions verify bearer tokens separately. This application does not implement a cookie-based SSR session or a custom PKCE callback exchange.
