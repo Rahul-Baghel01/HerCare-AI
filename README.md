@@ -175,6 +175,8 @@ Browser sessions persist in local storage and refresh through the Supabase clien
 
 ## Deploy to Vercel
 
+The reflected-XSS security patch pins TanStack Start to `1.168.60` with server core `1.169.39`. See the [security release notes](docs/VERCEL_READINESS.md#tanstack-start-security-patch---october-3-2026) for the compatible dependency versions and fresh validation.
+
 Publish the reviewed source to GitHub first. Deployment remains manual.
 
 1. Open [Vercel](https://vercel.com), choose **Add New > Project**, and import **Rahul-Baghel01/HerCare-AI**.
